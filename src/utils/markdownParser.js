@@ -25,13 +25,18 @@ export function parseMarkdown(mdText) {
 
   // Handle Bold
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
+
+  // Handle Italics
+  html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  html = html.replace(/_(.*?)_/g, '<em>$1</em>');
 
   // Handle Links
   html = html.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
 
   // Handle Bullet points (handle nested structures roughly)
   // Let's replace list items first
-  html = html.replace(/^- (.*?)$/gm, '<li>$1</li>');
+  html = html.replace(/^[-*] (.*?)$/gm, '<li>$1</li>');
   
   // Wrap consecutive <li> elements in <ul>
   // A simple regex approach: find groups of <li> and wrap them

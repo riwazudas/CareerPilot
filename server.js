@@ -31,23 +31,38 @@ const server = http.createServer((req, res) => {
   // GET /api/data - Retrieve database contents
   if (req.url === '/api/data' && req.method === 'GET') {
     try {
+      let dbData = {};
       if (fs.existsSync(DATA_FILE)) {
-        const data = fs.readFileSync(DATA_FILE, 'utf8');
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(data);
-      } else {
-        // Return empty defaults if file doesn't exist yet
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({}));
+        const fileContent = fs.readFileSync(DATA_FILE, 'utf8');
+        try {
+          dbData = JSON.parse(fileContent);
+        } catch (e) {
+          dbData = {};
+        }
       }
+
+      // Sync read-only master resume reference from resume.md
+      const resumeMdPath = path.join(__dirname, 'resume.md');
+      if (fs.existsSync(resumeMdPath)) {
+        dbData.resumeText = fs.readFileSync(resumeMdPath, 'utf8');
+      }
+
+      // Sync read-only baseline LaTeX resume from overleaf_resume.md
+      const overleafResumePath = path.join(__dirname, 'overleaf_resume.md');
+      if (fs.existsSync(overleafResumePath)) {
+        dbData.overleafResumeText = fs.readFileSync(overleafResumePath, 'utf8');
+      }
+
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(dbData));
     } catch (err) {
       res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ error: 'Failed to read data file: ' + err.message }));
+      res.end(JSON.stringify({ error: 'Failed to read data: ' + err.message }));
     }
     return;
   }
 
-  // POST /api/data - Write database contents to db.json
+  // POST /api/data - Write database contents and export job-specific tailored resumes
   if (req.url === '/api/data' && req.method === 'POST') {
     let body = '';
     req.on('data', chunk => {
@@ -56,15 +71,89 @@ const server = http.createServer((req, res) => {
     
     req.on('end', () => {
       try {
-        // Simple verification that it's valid JSON
-        JSON.parse(body);
+        const parsedPayload = JSON.parse(body);
         
+        // Write database config to db.json
         fs.writeFileSync(DATA_FILE, body, 'utf8');
+
+        // Automatically export job-specific tailored resumes to disk
+        if (Array.isArray(parsedPayload.jobs)) {
+          parsedPayload.jobs.forEach(job => {
+            if (job.tailoredResume && 
+                job.tailoredResume.length > 100 && 
+                !job.tailoredResume.includes('*(Run the Resume Lab optimizer')) {
+              
+              const sanitize = name => name.replace(/[^a-z0-9]/gi, '_').replace(/_+/g, '_').trim();
+              const filename = `Tailored_Resume_${sanitize(job.role)}_${sanitize(job.company)}.tex`;
+              const tailoredPath = path.join(__dirname, filename);
+              
+              fs.writeFileSync(tailoredPath, job.tailoredResume, 'utf8');
+            }
+          });
+        }
+
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true }));
       } catch (err) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Invalid JSON or write failed: ' + err.message }));
+      }
+    });
+    return;
+  }
+
+  // POST /api/compile-latex - Compiles raw LaTeX using the public compiler API
+  if (req.url === '/api/compile-latex' && req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => {
+      body += chunk.toString();
+    });
+    
+    req.on('end', async () => {
+      try {
+        const { latexCode } = JSON.parse(body);
+        if (!latexCode) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Missing latexCode' }));
+          return;
+        }
+
+        // Call the compiler API
+        const compilerUrl = 'https://latex.ytotech.com/builds/sync';
+        const response = await fetch(compilerUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            compiler: 'pdflatex',
+            resources: [
+              {
+                main: true,
+                content: latexCode
+              }
+            ]
+          })
+        });
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error('LaTeX compiler failed: ' + errText);
+        }
+
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        res.writeHead(200, {
+          'Content-Type': 'application/pdf',
+          'Content-Length': buffer.length,
+          'Content-Disposition': 'inline; filename="resume.pdf"'
+        });
+        res.end(buffer);
+      } catch (err) {
+        console.error('LaTeX compilation error:', err);
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: err.message }));
       }
     });
     return;

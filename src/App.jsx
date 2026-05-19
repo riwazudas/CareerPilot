@@ -76,6 +76,8 @@ function App() {
     return localStorage.getItem('cp_resume') || defaultResume;
   });
 
+  const [overleafResumeText, setOverleafResumeText] = useState('');
+
   const [jobs, setJobs] = useState(() => {
     const savedJobs = localStorage.getItem('cp_jobs');
     if (savedJobs) {
@@ -115,6 +117,9 @@ function App() {
         if (data.resumeText !== undefined) {
           setResumeText(data.resumeText);
           loadedResume = data.resumeText;
+        }
+        if (data.overleafResumeText !== undefined) {
+          setOverleafResumeText(data.overleafResumeText);
         }
         if (data.apiKey !== undefined) {
           setApiKey(data.apiKey);
@@ -279,6 +284,7 @@ function App() {
           <TailorLab 
             jobs={jobs}
             resumeText={resumeText}
+            overleafResumeText={overleafResumeText}
             onEditJob={handleEditJob}
             apiKey={apiKey}
             modelName={modelName}

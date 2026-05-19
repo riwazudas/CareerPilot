@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Sliders, FileText, CheckCircle, AlertTriangle, Play, Sparkles, Copy, Printer, Check, ArrowRight } from 'lucide-react';
+import { Sliders, FileText, CheckCircle, AlertTriangle, Play, Sparkles, Copy, Printer, Check, ArrowRight, RefreshCw, FileDown } from 'lucide-react';
 import { callGemini } from '../utils/gemini';
 import { parseMarkdown } from '../utils/markdownParser';
 
-export default function TailorLab({ jobs = [], resumeText, onEditJob, apiKey, modelName, selectedJobId, setSelectedJobId }) {
+export default function TailorLab({ jobs = [], resumeText, overleafResumeText, onEditJob, apiKey, modelName, selectedJobId, setSelectedJobId }) {
   const [activeJob, setActiveJob] = useState(null);
   const [activeTab, setActiveTab] = useState('resume'); // 'resume', 'cover'
   const [activeSubTab, setActiveSubTab] = useState('analysis'); // 'analysis', 'ranking', 'tailored', 'changelog'
@@ -109,6 +109,7 @@ export default function TailorLab({ jobs = [], resumeText, onEditJob, apiKey, mo
   }
 
   // Tailor Resume Trigger
+  // Tailor Resume Trigger (LaTeX-specific)
   const handleTailorResume = async () => {
     if (!apiKey) {
       alert('Please enter your Gemini API Key in the Settings view first.');
@@ -120,58 +121,158 @@ export default function TailorLab({ jobs = [], resumeText, onEditJob, apiKey, mo
     }
 
     setIsLoadingResume(true);
-    setLoadingStep('Reading resume and job posting...');
+    setLoadingStep('Reading LaTeX resume and job posting...');
 
-    const prompt = `You are a resume optimization specialist who analyzes job postings to identify exactly what hiring managers and ATS systems prioritize.
+    const prompt = `You are an expert LaTeX resume tailoring specialist.
 
-TASK: Tailor my resume to maximize relevance for a specific position.
+OBJECTIVE:
+Customize my existing Overleaf LaTeX resume for the target role while preserving the original template, formatting, and structure exactly.
 
 INPUTS:
-- Target role: ${activeJob.role} at ${activeJob.company}
-- Job description: ${activeJob.description}
-- My current resume: ${resumeText}
+1. Target Role:
+${activeJob.role} at ${activeJob.company}
 
-DELIVERABLES:
-1. **Keyword Gap Analysis**: List required skills/qualifications from the posting, marking which I have (✓) vs. missing (✗)
-2. **Priority Ranking**: Rank the top 5 requirements by emphasis in the posting
-3. **Tailored Resume**: Rewritten version with:
-   - Summary reframed around their priorities
-   - Bullet points reordered/reworded to mirror job language
-   - Quantified achievements where possible
-4. **Change Log**: Specific edits made and why each improves ATS/recruiter match
+2. Job Description:
+${activeJob.description}
 
-CONSTRAINTS:
-- Preserve factual accuracy—never fabricate experience
-- If I lack a "required" qualification, suggest how to address it (transferable skill, willingness to learn, or acknowledge the gap)
-- Flag any red flags I should prepare to address (gaps, overqualification, underqualification)
+3. Base LaTeX Resume (overleaf_resume.md):
+${overleafResumeText || 'No baseline LaTeX resume found.'}
 
-Please return your response formatted in strict Markdown. Make sure each of the 4 deliverables is clearly separated by a major header (e.g. # Keyword Gap Analysis, # Priority Ranking, # Tailored Resume, # Change Log) so that it can be parsed cleanly.`;
+4. Master Resume Reference (resume.md):
+${resumeText}
+
+OUTPUT FORMAT:
+Return exactly these 4 markdown sections in order:
+
+# Keyword Gap Analysis
+Provide a table containing:
+- Job requirement / keyword
+- Match status (✓ or ✗)
+- Evidence from my background
+- Recommended optimization
+
+# Priority Ranking
+Rank the top 5 most important requirements for this role based on the job description and explain why each matters.
+
+# Tailored Resume
+Provide the COMPLETE compile-ready LaTeX document.
+
+STRICT REQUIREMENTS:
+- Output raw LaTeX only under this section.
+- Do NOT use markdown code fences.
+- The document MUST begin with \\documentclass and end with \\end{document}.
+- Use the provided overleaf_resume.md as the exact structural foundation.
+- Preserve ALL original:
+  - formatting
+  - spacing
+  - macros
+  - sections
+  - styling
+  - packages
+  - margins
+  - font settings
+  - layout conventions
+- Modify only the resume content itself.
+- Tailor experience, projects, skills, and summaries directly to the job description.
+- Integrate relevant content from resume.md where beneficial.
+- Expand the resume into a strong 2–3 page version if enough relevant material exists.
+- Keep the certification section from the master resume.
+- Do NOT include work rights, visa status, or similar statements.
+- Ensure all LaTeX syntax is valid and fully compilable.
+
+# Change Log
+List all major modifications made, including:
+- Added or removed skills
+- Updated experience bullets
+- New projects or certifications included
+- Keyword optimizations
+- Reordered sections
+- Any tailoring decisions made for ATS alignment or recruiter relevance
+
+ADDITIONAL GUIDELINES:
+- Prioritize ATS keyword alignment without sounding unnatural.
+- Quantify achievements where possible.
+- Emphasize technologies, leadership, customer impact, scalability, automation, analytics, and domain-specific skills when relevant.
+- Remove weak or irrelevant content if stronger alternatives exist in the master resume.
+- Keep wording professional, concise, and achievement-oriented.
+`;
 
     try {
-      setTimeout(() => setLoadingStep('Analyzing keyword gaps with Gemini...'), 1500);
-      setTimeout(() => setLoadingStep('Reframing resume summary and bullet points...'), 3500);
-      setTimeout(() => setLoadingStep('Generating Change Log and ATS metrics...'), 5500);
+      setTimeout(() => setLoadingStep('Analyzing LaTeX and keyword gaps...'), 1500);
+      setTimeout(() => setLoadingStep('Optimizing LaTeX sections and content...'), 3500);
+      setTimeout(() => setLoadingStep('Generating Change Log and saving...'), 5500);
 
       const response = await callGemini(apiKey, prompt, modelName);
       
       const sections = splitTailoredResponse(response);
+
+      let finalResume = sections.resume || response;
+      // Strip ```latex ... ``` markdown wrapper if present
+      finalResume = finalResume.replace(/^```latex\n?/i, '').replace(/```\s*$/, '').trim();
 
       const updatedJob = {
         ...activeJob,
         tailoredResumeRaw: response,
         keywordAnalysis: sections.keywords || 'Generated Keyword Analysis',
         priorityRanking: sections.ranking || 'Generated Priority Ranking',
-        tailoredResume: sections.resume || response,
+        tailoredResume: finalResume,
         changeLog: sections.changelog || 'Generated Change Log'
       };
 
       onEditJob(updatedJob);
       setActiveSubTab('analysis');
-      triggerCopyNotification('Resume Tailored Successfully!');
+      triggerCopyNotification('LaTeX Resume Tailored!');
     } catch (err) {
       alert(`API Error: ${err.message}`);
     } finally {
       setIsLoadingResume(false);
+    }
+  };
+
+  // Compile and Export PDF using the backend LaTeX compiler
+  const handleCompileLatex = async (type = 'resume') => {
+    const isCover = type === 'cover';
+    const latexSource = isCover ? activeJob?.coverLetter : activeJob?.tailoredResume;
+    
+    if (!latexSource) return;
+
+    const setLoading = isCover ? setIsLoadingCover : setIsLoadingResume;
+    setLoading(true);
+    if (!isCover) setLoadingStep('Compiling LaTeX document on backend server...');
+
+    try {
+      const response = await fetch('http://localhost:3001/api/compile-latex', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          latexCode: latexSource
+        })
+      });
+
+      if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson.error || 'LaTeX compilation failed. Check your LaTeX syntax.');
+      }
+
+      // Download PDF binary stream
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const prefix = isCover ? 'Cover_Letter' : 'Tailored_Resume';
+      a.download = `${prefix}_${activeJob.role.replace(/[^a-z0-9]/gi, '_')}_${activeJob.company.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      triggerCopyNotification(`Native LaTeX ${isCover ? 'Cover Letter' : 'Resume'} Exported!`);
+    } catch (err) {
+      alert(`Compilation Error: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -231,30 +332,44 @@ Identify the top 3 or 4 key hiring requirements. Return ONLY a concise comma-sep
     }
 
     setIsLoadingCover(true);
-    const prompt = `You are a hiring manager who has read thousands of cover letters. You know what makes candidates stand out vs. sound generic.
+    const prompt = `You are an expert LaTeX cover letter specialist and master career strategist.
 
-TASK: Write a cover letter that demonstrates genuine fit—not just enthusiasm.
+TASK: Write a highly compelling cover letter that demonstrates genuine fit and output it as a complete, compilable LaTeX document. You must combine the following advanced writing frameworks to structure the narrative of the letter.
 
 INPUTS:
 - Role: ${activeJob.role} at ${activeJob.company}
 - My relevant qualifications: ${strengths}
 - Key requirements from posting: ${requirements}
 - Something specific about the company I admire: ${companyDetail || "A modern engineering workspace driving technical innovation."}
+- Current Date: ${new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}
+- My Master Resume:
+${resumeText}
+- Job Description:
+${activeJob.description}
 
 DELIVERABLES:
-A cover letter (250-300 words) structured as:
-1. **Opening Hook** (1-2 sentences): Specific connection to company/role—not "I'm excited to apply"
-2. **Value Proof** (2-3 sentences): One concrete achievement that maps to their top requirement
-3. **Fit Statement** (2-3 sentences): Why this role specifically, not just any role
-4. **Close** (1 sentence): Clear call to action
+A highly strategic cover letter structured exactly using these psychological and structural frameworks:
 
-CONSTRAINTS:
+1. **Attention Hook Creator**: Use the AIDA+ framework (Attention, Interest, Desire, Action + Relevance). Begin with a high-impact statement connecting ${activeJob.company}'s strategic initiative to my proven solutions.
+2. **Value Bridge Builder & Requirements Match**: Combine the CAR-Q technique (Challenge, Action, Result, Quantification) and STAR-T methodology (Situation, Task, Action, Result, Transfer). Highlight parallel experiences matching their exact terminology and priority order. Show problem-solving stories with increasing responsibility. Build capability proof with a nested structure (core competency, verification, application potential).
+3. **Standout Story Framer & Growth Mindset**: Use the PEA framework (Problem, Execution, Achievement) and AGL technique (Achievement, Gap identified, Learning implemented). Create story tension with challenge magnitude before revealing the solution, positioning it strategically as a proof point of continuous improvement.
+4. **Career Pivot & Industry Insight (Optional/Merge if needed)**: Use the LEAP method and TIP methodology (Trends identified, Implications explained, Positioning suggested). Reframe diverse backgrounds as competitive edges and include forward-looking market analysis.
+5. **Work Ethic & Culture Alignment Closer**: Use the VPA technique (Values aligned, Purpose shared, Action requested) and RID framework (Responsibility taken, Initiative demonstrated, Determination proven). Structure with mission connection, values demonstration, and forward-looking enthusiasm, closing with a strong call to action. Incorporate Connection Value (CAP method) if applicable.
+
+STRICT CONSTRAINTS:
+- Keep the overall length appropriate for a standard cover letter (approx 350-500 words).
 - No clichés: "passionate," "team player," "excited about this opportunity"
 - Every sentence must provide information my resume doesn't
 - Tone: Confident without arrogance, specific without rambling
-- If I lack a stated requirement, do NOT mention it—focus on strengths
+- Explicitly state that I have "Full Australian Work Rights".
+- Do NOT use long dashes (em dash/en dash), semi-colons, or colons anywhere in the letter.
 
-Please return the cover letter body directly, starting with a clean address block (date, company, hiring team) at the top, ready for printing.`;
+LATEX OUTPUT REQUIREMENTS:
+- Provide the COMPLETE, valid, compile-ready LaTeX document using the standard \\article\\ or \\letter\\ class.
+- Include a clean, professional header with my details: Riwaz Udas, udasriwaz@gmail.com, 0451337510, Melbourne, VIC, Australia.
+- Include the recipient address block and the current date.
+- Do NOT wrap it in a markdown code block (i.e., do not use \`\`\`latex or \`\`\`). Output the raw LaTeX code directly.
+- Ensure all LaTeX control sequences are perfectly balanced and valid so that it compiles flawlessly.`;
 
     try {
       const response = await callGemini(apiKey, prompt, modelName);
@@ -286,8 +401,424 @@ Please return the cover letter body directly, starting with a clean address bloc
     setTimeout(() => setCopiedText(false), 2000);
   };
 
-  const handlePrint = () => {
-    window.print();
+  const handleExportPDF = (type = 'both') => {
+    if (!activeJob) return;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      alert('Pop-up blocked. Please allow pop-ups for CareerPilot to generate your PDF.');
+      return;
+    }
+
+    const title = `${activeJob.company} - ${activeJob.role} Application`;
+    
+    // Parse Markdown Resume into beautiful print-ready HTML
+    const resumeHtml = activeJob.tailoredResume 
+      ? parseMarkdown(activeJob.tailoredResume) 
+      : '<p>No tailored resume generated yet.</p>';
+      
+    // Format Cover Letter with paragraphs
+    const coverLetterHtml = activeJob.coverLetter
+      ? activeJob.coverLetter.replace(/\n/g, '<br />')
+      : '<p>No cover letter generated yet.</p>';
+
+    const dateStr = new Date().toLocaleDateString('en-AU', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+
+    // LaTeX-style Parser
+    let styledResumeHtml = resumeHtml;
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(resumeHtml, 'text/html');
+      
+      // 1. Extract Header (Candidate Name and Contact Details)
+      const allHeadings = Array.from(doc.querySelectorAll('h1, h2, h3'));
+      const nameHeading = allHeadings.find(h => h.tagName === 'H1' || h.tagName === 'H2');
+      
+      let nameText = 'Riwaz Udas';
+      let contactHtml = '';
+      let bodyHtml = '';
+
+      if (nameHeading) {
+        nameText = nameHeading.textContent;
+        
+        // Find first real section heading (the next H1 or H2)
+        const firstSectionHeading = allHeadings.find(h => 
+          (h.tagName === 'H1' || h.tagName === 'H2') && 
+          h !== nameHeading
+        );
+        
+        if (firstSectionHeading) {
+          const contactElements = [];
+          let current = nameHeading.nextSibling;
+          while (current && current !== firstSectionHeading) {
+            if (current.nodeType === Node.ELEMENT_NODE) {
+              if (current.tagName !== 'HR') {
+                contactElements.push(current.outerHTML);
+              }
+            } else if (current.nodeType === Node.TEXT_NODE && current.textContent.trim()) {
+              contactElements.push(current.textContent.trim());
+            }
+            current = current.nextSibling;
+          }
+          
+          // Join details nicely, replacing separators with bullet dots
+          const rawContactText = contactElements
+            .join(' ')
+            .replace(/\s+/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/[|•—–]/g, ' • ')
+            .trim();
+          
+          // Split contact elements by ' • ' and format them with dot dividers
+          const parts = rawContactText.split(' • ').map(p => p.trim()).filter(Boolean);
+          contactHtml = parts.join(' &nbsp;•&nbsp; ');
+          
+          // Body starts at firstSectionHeading
+          const bodyElements = [];
+          current = firstSectionHeading;
+          while (current) {
+            bodyElements.push(current.nodeType === Node.ELEMENT_NODE ? current.outerHTML : current.textContent);
+            current = current.nextSibling;
+          }
+          bodyHtml = bodyElements.join('\n');
+        } else {
+          bodyHtml = doc.body.innerHTML;
+        }
+      } else {
+        bodyHtml = doc.body.innerHTML;
+      }
+
+      // 2. Parse bodyHtml to identify sections and transform subheadings into double-column LaTeX layouts
+      const bodyDoc = parser.parseFromString(bodyHtml, 'text/html');
+      
+      // Tag major uppercase section headers (e.g. "PROFESSIONAL SUMMARY", "TECHNICAL SKILLS")
+      const bodyHeadings = Array.from(bodyDoc.querySelectorAll('h1, h2, h3, h4'));
+      bodyHeadings.forEach(h => {
+        const text = h.textContent.trim();
+        if (text === text.toUpperCase() && text.length > 3) {
+          h.className = 'latex-section';
+        }
+      });
+
+      // Transform experience and education entries into double-column tables
+      bodyHeadings.forEach(h => {
+        if (h.classList.contains('latex-section')) return;
+
+        // Case 1: single heading containing Company | Role (supporting em-dash, en-dash, and pipes)
+        const text = h.textContent.trim();
+        const hasSep = text.includes('|') || text.includes('—') || text.includes('–');
+        if (hasSep && (h.tagName === 'H2' || h.tagName === 'H3')) {
+          const parts = text.split(/[|—–]/).map(p => p.trim());
+          const company = parts[0] || '';
+          const role = parts[1] || '';
+
+          // Look for next sibling that has location and date
+          const next = h.nextElementSibling;
+          if (next && (next.tagName === 'P' || next.tagName === 'DIV' || next.tagName === 'EM' || next.tagName === 'STRONG')) {
+            const nextText = next.textContent.trim();
+            const hasMetaSep = nextText.includes('|') || nextText.includes('—') || nextText.includes('–');
+            if (hasMetaSep) {
+              const metaParts = nextText.split(/[|—–]/).map(p => p.trim());
+              const location = metaParts[0] || '';
+              const date = metaParts[1] || '';
+
+              const container = bodyDoc.createElement('div');
+              container.className = 'latex-subheading';
+              container.innerHTML = `
+                <div class="latex-row">
+                  <strong class="latex-left">${company}</strong>
+                  <span class="latex-right">${date}</span>
+                </div>
+                <div class="latex-row">
+                  <span class="latex-sub-left">${role}</span>
+                  <span class="latex-sub-right">${location}</span>
+                </div>
+              `;
+              h.parentNode.insertBefore(container, h);
+              h.remove();
+              next.remove();
+              return;
+            }
+          }
+        }
+
+        // Case 2: standard three-tier (h2 followed by h3 followed by meta)
+        if (h.tagName === 'H2') {
+          const h3 = h.nextElementSibling;
+          if (h3 && h3.tagName === 'H3' && !h3.classList.contains('latex-section')) {
+            const meta = h3.nextElementSibling;
+            if (meta && (meta.tagName === 'P' || meta.tagName === 'DIV' || meta.tagName === 'EM' || meta.tagName === 'STRONG')) {
+              const metaText = meta.textContent.trim();
+              const hasMetaSep = metaText.includes('|') || metaText.includes('—') || metaText.includes('–');
+              if (hasMetaSep) {
+                const parts = metaText.split(/[|—–]/).map(p => p.trim());
+                const location = parts[0] || '';
+                const date = parts[1] || '';
+
+                const container = bodyDoc.createElement('div');
+                container.className = 'latex-subheading';
+                container.innerHTML = `
+                  <div class="latex-row">
+                    <strong class="latex-left">${h.textContent}</strong>
+                    <span class="latex-right">${date}</span>
+                  </div>
+                  <div class="latex-row">
+                    <span class="latex-sub-left">${h3.textContent}</span>
+                    <span class="latex-sub-right">${location}</span>
+                  </div>
+                `;
+                h.parentNode.insertBefore(container, h);
+                h.remove();
+                h3.remove();
+                meta.remove();
+              }
+            }
+          }
+        }
+      });
+
+      styledResumeHtml = `
+        <div class="latex-header">
+          <div class="latex-name">${nameText}</div>
+          <div class="latex-contact">${contactHtml}</div>
+        </div>
+        <div class="latex-body">
+          ${bodyDoc.body.innerHTML}
+        </div>
+      `;
+    } catch (err) {
+      console.error("LaTeX DOM Parsing failure:", err);
+    }
+
+    const contentHtml = `
+      <html>
+        <head>
+          <title>${title}</title>
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+          <style>
+            @page {
+              size: A4;
+              margin: 12.7mm;
+            }
+            body {
+              font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+              color: #1a1a1a;
+              line-height: 1.4;
+              font-size: 10pt;
+              margin: 0;
+              padding: 0;
+            }
+            
+            /* Print Optimization */
+            @media print {
+              html, body {
+                width: 210mm;
+                height: 297mm;
+              }
+              .page-break {
+                page-break-before: always;
+              }
+            }
+
+            .page-break {
+              page-break-before: always;
+            }
+
+            /* Premium LaTeX-style Resume Formatting */
+            .resume-container {
+              max-width: 100%;
+              color: #1a1a1a;
+            }
+            
+            .latex-header {
+              text-align: center;
+              margin-bottom: 12px;
+            }
+            
+            .latex-name {
+              font-size: 22pt;
+              font-weight: 700;
+              color: #000000;
+              margin-bottom: 4px;
+              letter-spacing: -0.5px;
+            }
+            
+            .latex-contact {
+              font-size: 8.5pt;
+              color: #1a1a1a;
+              margin-bottom: 2px;
+            }
+            
+            .latex-contact a {
+              color: #1a1a1a;
+              text-decoration: none;
+              border-bottom: 1px dotted #4b5563;
+            }
+            
+            .latex-section {
+              font-size: 11.5pt;
+              font-weight: 700;
+              color: #000000;
+              border-bottom: 2px solid #d3d3d3; /* 2pt light-grey titlerule */
+              padding-bottom: 2px;
+              margin-top: 14pt;
+              margin-bottom: 6pt;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              display: block;
+            }
+            
+            .latex-body h2,
+            .latex-body h3,
+            .latex-body h4 {
+              font-size: 10pt;
+              font-weight: 700;
+              color: #000000;
+              margin-top: 10pt;
+              margin-bottom: 3pt;
+            }
+            
+            .latex-body p {
+              font-size: 9.5pt;
+              margin: 0 0 6px 0;
+              line-height: 1.4;
+              text-align: justify;
+            }
+            
+            /* Two-Column LaTeX Subheading */
+            .latex-subheading {
+              margin-top: 8pt;
+              margin-bottom: 4pt;
+            }
+            
+            .latex-row {
+              display: flex;
+              justify-content: space-between;
+              font-size: 9.5pt;
+              line-height: 1.3;
+            }
+            
+            .latex-left {
+              font-weight: 700;
+              color: #000000;
+            }
+            
+            .latex-right {
+              font-size: 9pt;
+              color: #4b5563;
+            }
+            
+            .latex-sub-left {
+              font-style: italic;
+              color: #1a1a1a;
+            }
+            
+            .latex-sub-right {
+              font-size: 9pt;
+              color: #4b5563;
+            }
+            
+            .latex-body strong {
+              font-weight: 700;
+              color: #000000;
+            }
+            
+            .latex-body ul {
+              margin: 0 0 6pt 0;
+              padding-left: 15px;
+              list-style-type: disc;
+            }
+            
+            .latex-body li {
+              font-size: 9.5pt;
+              line-height: 1.35;
+              margin-bottom: 3px;
+              color: #1a1a1a;
+            }
+            
+            .latex-body hr {
+              display: none; /* Hide raw page breaks inside body */
+            }
+
+            /* Cover Letter Styling */
+            .cover-letter-container {
+              max-width: 100%;
+              font-family: 'Inter', sans-serif;
+            }
+            .cover-letter-header {
+              margin-bottom: 30px;
+              line-height: 1.4;
+            }
+            .cover-letter-header .candidate-name {
+              font-size: 18pt;
+              font-weight: 700;
+              color: #111827;
+              margin-bottom: 4px;
+            }
+            .cover-letter-header .candidate-info {
+              color: #4b5563;
+              font-size: 9.5pt;
+            }
+            .cover-letter-recipient {
+              margin-bottom: 25px;
+              line-height: 1.4;
+            }
+            .cover-letter-body {
+              text-align: justify;
+              line-height: 1.6;
+              font-size: 10pt;
+            }
+            .cover-letter-body p {
+              margin-bottom: 15px;
+            }
+          </style>
+        </head>
+        <body>
+          ${type === 'resume' || type === 'both' ? `
+            <div class="resume-container">
+              ${styledResumeHtml}
+            </div>
+          ` : ''}
+
+          ${type === 'both' ? '<div class="page-break"></div>' : ''}
+
+          ${type === 'cover' || type === 'both' ? `
+            <div class="cover-letter-container">
+              <div class="cover-letter-header" style="border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 25px;">
+                <div class="candidate-name" style="text-align: center;">Riwaz Udas</div>
+                <div class="candidate-info" style="text-align: center;">Melbourne, VIC, Australia | 0451337510 | udasriwaz@gmail.com</div>
+              </div>
+              <div class="cover-letter-recipient" style="margin-bottom: 30px;">
+                <strong>Date:</strong> ${dateStr}<br /><br />
+                <strong>To:</strong> Hiring Team / Recruiting Department<br />
+                <strong>Company:</strong> ${activeJob.company}<br />
+                <strong>Position:</strong> ${activeJob.role}
+              </div>
+              <div class="cover-letter-body">
+                ${coverLetterHtml}
+              </div>
+            </div>
+          ` : ''}
+
+          <script>
+            window.onload = function() {
+              setTimeout(function() {
+                window.print();
+              }, 250);
+            };
+          </script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(contentHtml);
+    printWindow.document.close();
   };
 
   if (jobs.length === 0) {
@@ -349,6 +880,8 @@ Please return the cover letter body directly, starting with a clean address bloc
                   </span>
                 </div>
               </div>
+
+
 
               {!activeJob.description && (
                 <div style={{ 
@@ -457,6 +990,16 @@ Please return the cover letter body directly, starting with a clean address bloc
                     </div>
 
                     <div style={{ display: 'flex', gap: '8px' }}>
+                      {activeSubTab === 'tailored' && (
+                        <button 
+                          className="glow-btn" 
+                          style={{ padding: '8px 14px', fontSize: '0.85rem' }}
+                          onClick={handleCompileLatex}
+                        >
+                          <Sparkles size={14} />
+                          <span>Compile & Export PDF</span>
+                        </button>
+                      )}
                       <button 
                         className="secondary-btn" 
                         style={{ padding: '8px 14px', fontSize: '0.85rem' }}
@@ -490,18 +1033,50 @@ Please return the cover letter body directly, starting with a clean address bloc
                           justifyContent: 'space-between',
                           fontSize: '0.8rem'
                         }}>
-                          <span className="text-muted">Copy this markdown below to use in your customized resume.</span>
+                          <span className="text-muted">Edit or refine your customized LaTeX source code below before compiling.</span>
                           <button 
                             className="text-btn" 
                             style={{ color: 'var(--primary)' }}
-                            onClick={() => handleCopyClipboard(subTabContent)}
+                            onClick={() => handleCopyClipboard(activeJob.tailoredResume)}
                           >
                             <Copy size={12} />
-                            <span>Copy Raw Markdown</span>
+                            <span>Copy LaTeX Source</span>
                           </button>
                         </div>
-                        <div className="resume-preview glass-card" style={{ maxHeight: '500px' }}>
-                          <div className="markdown-body" dangerouslySetInnerHTML={{ __html: parseMarkdown(subTabContent) }} />
+                        <textarea
+                          className="resume-editor"
+                          style={{ 
+                            fontFamily: 'Consolas, Monaco, monospace', 
+                            fontSize: '0.85rem', 
+                            height: '500px', 
+                            background: '#0d1117', 
+                            color: '#c9d1d9', 
+                            borderColor: '#30363d',
+                            padding: '16px',
+                            lineHeight: '1.5',
+                            borderRadius: '6px',
+                            width: '100%',
+                            outline: 'none',
+                            resize: 'vertical'
+                          }}
+                          value={activeJob.tailoredResume}
+                          onChange={(e) => {
+                            const updatedJob = {
+                              ...activeJob,
+                              tailoredResume: e.target.value
+                            };
+                            onEditJob(updatedJob);
+                          }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '4px' }}>
+                          <button
+                            className="glow-btn"
+                            onClick={handleCompileLatex}
+                            style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
+                          >
+                            <Sparkles size={16} />
+                            <span>Compile & Export PDF (Native LaTeX)</span>
+                          </button>
                         </div>
                       </div>
                     ) : (
@@ -589,32 +1164,27 @@ Please return the cover letter body directly, starting with a clean address bloc
                   {/* Rendered Letter block */}
                   {activeJob?.coverLetter && (
                     <div style={{ marginTop: '24px', borderTop: '1px solid var(--border)', paddingTop: '24px' }}>
-                      <div className="cover-letter-toolbar">
-                        <button className="secondary-btn" onClick={() => handleCopyClipboard(activeJob.coverLetter)}>
-                          <Copy size={14} />
-                          <span>Copy Letter</span>
-                        </button>
-                        <button className="secondary-btn" onClick={handlePrint}>
-                          <Printer size={14} />
-                          <span>Print / PDF</span>
+                      <div className="cover-letter-toolbar" style={{ justifyContent: 'space-between', display: 'flex', marginBottom: '16px' }}>
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                          <button className="secondary-btn" onClick={() => handleCopyClipboard(activeJob.coverLetter)}>
+                            <Copy size={14} />
+                            <span>Copy LaTeX</span>
+                          </button>
+                        </div>
+                        <button 
+                          className="glow-btn" 
+                          onClick={() => handleCompileLatex('cover')}
+                          style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
+                        >
+                          <Sparkles size={16} />
+                          <span>Compile & Export PDF (Native LaTeX)</span>
                         </button>
                       </div>
 
-                      <div className="cover-letter-paper">
-                        <div className="cover-letter-meta">
-                          <div>Riwaz Udas</div>
-                          <div>udasriwaz@gmail.com | 0451337510</div>
-                          <div>Melbourne, VIC, Australia</div>
-                          <br />
-                          <div>Date: {new Date().toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                          <br />
-                          <div>Hiring Manager, Recruitment Team</div>
-                          <div>{activeJob.company}</div>
-                        </div>
-
-                        <div className="cover-letter-body">
+                      <div className="resume-editor" style={{ height: '400px', width: '100%', fontFamily: 'monospace', fontSize: '0.85rem', padding: '16px', overflowY: 'auto' }}>
+                        <pre style={{ whiteSpace: 'pre-wrap', margin: 0 }}>
                           {activeJob.coverLetter}
-                        </div>
+                        </pre>
                       </div>
                     </div>
                   )}
