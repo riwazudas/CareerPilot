@@ -123,10 +123,10 @@ export default function TailorLab({ jobs = [], resumeText, overleafResumeText, o
     setIsLoadingResume(true);
     setLoadingStep('Reading LaTeX resume and job posting...');
 
-    const prompt = `You are an expert LaTeX resume tailoring specialist.
+    const prompt = `You are an elite LaTeX resume tailoring specialist and career strategist.
 
 OBJECTIVE:
-Customize my existing Overleaf LaTeX resume for the target role while preserving the original template, formatting, and structure exactly.
+Customize my existing Overleaf LaTeX resume for the target role by combining advanced career strategy frameworks while preserving the original template's structure exactly.
 
 INPUTS:
 1. Target Role:
@@ -144,57 +144,42 @@ ${resumeText}
 OUTPUT FORMAT:
 Return exactly these 4 markdown sections in order:
 
-# Keyword Gap Analysis
-Provide a table containing:
-- Job requirement / keyword
-- Match status (✓ or ✗)
-- Evidence from my background
-- Recommended optimization
+# Keyword Gap Analysis & ATS Optimization
+Use the "exact match method" to analyze job posting keywords against my background. Provide a table showing Match Status, Evidence, and Recommended Optimization to pass computer screening. 
 
-# Priority Ranking
-Rank the top 5 most important requirements for this role based on the job description and explain why each matters.
+# Priority Ranking & Strategy
+Rank the top 5 most important requirements for this role based on the job description and briefly explain the strategic positioning required to highlight my matching competencies.
 
 # Tailored Resume
-Provide the COMPLETE compile-ready LaTeX document.
+Provide the COMPLETE compile-ready LaTeX document applying the following advanced frameworks to the content:
+
+1. **ATS Scanner Optimizer**: Inject exact-match keywords naturally.
+2. **Impactful Bullet Creator**: Rewrite experience bullets using the "CAR formula" (Challenge-Action-Result) with real numbers, business impact, and quantified cost savings/process improvements.
+3. **Executive Brand Positioning**: Rewrite the professional summary using the "value hook method" to grab attention instantly with years of experience, biggest wins, and clear direction.
+4. **High-Value Skills Organizer**: Reorganize the skills section using the "market priority system," listing demanded skills first.
+5. **Leadership Story Builder**: (If applicable) Turn management/senior wins into powerful stories using the "team impact method" showing people development and team growth.
+6. **Career Bridge Creator**: Connect past diverse experience to the target role using "problem-solution mapping" to show how my skills fix their challenges.
+7. **Education Value Maximizer**: Present education and certifications using the "business relevance filter".
+8. **Gap Narrative Builder**: (If applicable) Frame any career gaps using the "growth story technique".
+9. **Platform-Specific Optimization**: Ensure the content structure is dense but easily scannable, optimized for ATS and recruiter reading.
+10. **Project Success Presenter**: Select and present EXACTLY 3 key projects from the master resume using the "business impact showcase". Provide comprehensive bullet points explaining the basics, technical details, methods, and measurable impact of each.
 
 STRICT REQUIREMENTS:
 - Output raw LaTeX only under this section.
 - Do NOT use markdown code fences.
 - The document MUST begin with \\documentclass and end with \\end{document}.
 - Use the provided overleaf_resume.md as the exact structural foundation.
-- Preserve ALL original:
-  - formatting
-  - spacing
-  - macros
-  - sections
-  - styling
-  - packages
-  - margins
-  - font settings
-  - layout conventions
-- Modify only the resume content itself.
-- Tailor experience, projects, skills, and summaries directly to the job description.
-- Integrate relevant content from resume.md where beneficial.
-- Expand the resume into a strong 2–3 page version if enough relevant material exists.
+- Preserve ALL original formatting, macros, margins, and packages.
+- Expand the resume into a strong 2–3 page version.
+- Substantially explain the work experience section by including highly detailed, quantified bullet points showcasing the depth and scope of past roles.
+- Ensure EVERY work experience entry has at least 4 to 5 bullet points.
+- Ensure EVERY project entry has at least 4 bullet points.
 - Keep the certification section from the master resume.
 - Do NOT include work rights, visa status, or similar statements.
 - Ensure all LaTeX syntax is valid and fully compilable.
 
 # Change Log
-List all major modifications made, including:
-- Added or removed skills
-- Updated experience bullets
-- New projects or certifications included
-- Keyword optimizations
-- Reordered sections
-- Any tailoring decisions made for ATS alignment or recruiter relevance
-
-ADDITIONAL GUIDELINES:
-- Prioritize ATS keyword alignment without sounding unnatural.
-- Quantify achievements where possible.
-- Emphasize technologies, leadership, customer impact, scalability, automation, analytics, and domain-specific skills when relevant.
-- Remove weak or irrelevant content if stronger alternatives exist in the master resume.
-- Keep wording professional, concise, and achievement-oriented.
+List all major modifications made, including how the specific strategic frameworks (e.g. CAR, value hook, exact match method) were applied.
 `;
 
     try {
