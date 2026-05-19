@@ -4,12 +4,12 @@ import { Settings as SettingsIcon, Save, Eye, EyeOff, ShieldCheck, CheckCircle, 
 export default function Settings({ apiKey, modelName, onSaveSettings, onClearDatabase }) {
   const [keyInput, setKeyInput] = useState(apiKey);
   const [modelSelect, setModelSelect] = useState(
-    ['gemini-2.5-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash'].includes(modelName)
+    ['gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-3-flash'].includes(modelName)
       ? modelName
       : 'custom'
   );
   const [customModel, setCustomModel] = useState(
-    ['gemini-2.5-flash', 'gemini-2.0-flash-lite', 'gemini-2.0-flash', 'gemini-1.5-flash'].includes(modelName)
+    ['gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash', 'gemini-3-flash'].includes(modelName)
       ? ''
       : modelName
   );
@@ -33,7 +33,7 @@ export default function Settings({ apiKey, modelName, onSaveSettings, onClearDat
     if (confirm('CAUTION: This will delete ALL tracked jobs, tailored resumes, cover letters, and reset settings back to default. This cannot be undone. Are you absolutely sure?')) {
       onClearDatabase();
       setKeyInput('');
-      setModelSelect('gemini-2.5-flash');
+      setModelSelect('gemini-3.1-flash-lite');
       setCustomModel('');
       triggerNotification('Database cleared & reset!');
     }
@@ -99,10 +99,10 @@ export default function Settings({ apiKey, modelName, onSaveSettings, onClearDat
                 value={modelSelect}
                 onChange={(e) => setModelSelect(e.target.value)}
               >
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended - Blazing Fast)</option>
-                <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite</option>
-                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+                <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (Fastest & Efficient)</option>
+                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-3-flash">Gemini 3 Flash (Advanced Reasoning)</option>
                 <option value="custom">Custom Endpoint Model...</option>
               </select>
             </div>

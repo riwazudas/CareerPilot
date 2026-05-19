@@ -70,7 +70,7 @@ const getSampleJobs = () => {
 function App() {
   const [activeView, setActiveView] = useState('dashboard');
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('cp_api_key') || '');
-  const [modelName, setModelName] = useState(() => localStorage.getItem('cp_model_name') || 'gemini-2.5-flash');
+  const [modelName, setModelName] = useState(() => localStorage.getItem('cp_model_name') || 'gemini-3.1-flash-lite');
   
   const [resumeText, setResumeText] = useState(() => {
     return localStorage.getItem('cp_resume') || defaultResume;
@@ -243,7 +243,7 @@ function App() {
     localStorage.removeItem('cp_model_name');
     
     setApiKey('');
-    setModelName('gemini-2.5-flash');
+    setModelName('gemini-3.1-flash-lite');
     setResumeText(defaultResume);
     const samples = getSampleJobs();
     setJobs(samples);
