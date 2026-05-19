@@ -1,4 +1,4 @@
-import { spawn } from 'child_process';
+import { spawn, exec } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -21,6 +21,23 @@ const frontend = spawn('npx', ['vite'], {
   shell: true,
   stdio: 'inherit'
 });
+
+// 3. Automatically open default web browser after 1.5 seconds once Vite boots
+const appUrl = 'http://localhost:5173/';
+setTimeout(() => {
+  console.log(`\x1b[36m[CareerPilot Bootloader]\x1b[0m Launching default browser to: ${appUrl}`);
+  const startCmd = process.platform === 'darwin' 
+    ? `open "${appUrl}"` 
+    : process.platform === 'win32' 
+      ? `start "" "${appUrl}"` 
+      : `xdg-open "${appUrl}"`;
+
+  exec(startCmd, (err) => {
+    if (err) {
+      console.warn('[CareerPilot Bootloader] Could not automatically open browser:', err.message);
+    }
+  });
+}, 1500);
 
 // Graceful cleanup on terminal close
 const handleExit = () => {
