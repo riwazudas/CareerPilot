@@ -4,7 +4,7 @@ CareerPilot is an intelligent, automated resume builder and job application trac
 
 ## How it Works
 
-CareerPilot features a frontend built with Vite and React, running alongside a local Node.js backend. The backend manages saving and reading job applications from the local file system in a JSON format database, enabling you to build, sync, and compile latex tailored resumes.
+CareerPilot features a frontend built with Vite and React, running alongside a local Node.js backend. The backend manages saving and reading job applications from the local file system in a JSON format database, enabling you to build, sync, and compile LaTeX tailored resumes (saved automatically inside the `data/tailored_resumes/` folder).
 
 ## How to Run Locally
 

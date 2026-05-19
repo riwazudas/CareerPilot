@@ -9,10 +9,14 @@ const __dirname = path.dirname(__filename);
 const PORT = 3001;
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'db.json');
+const TAILORED_RESUMES_DIR = path.join(DATA_DIR, 'tailored_resumes');
 
-// Ensure data folder exists
+// Ensure data folder and tailored resumes subfolder exist
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+if (!fs.existsSync(TAILORED_RESUMES_DIR)) {
+  fs.mkdirSync(TAILORED_RESUMES_DIR, { recursive: true });
 }
 
 const server = http.createServer((req, res) => {
@@ -85,7 +89,7 @@ const server = http.createServer((req, res) => {
               
               const sanitize = name => name.replace(/[^a-z0-9]/gi, '_').replace(/_+/g, '_').trim();
               const filename = `Tailored_Resume_${sanitize(job.role)}_${sanitize(job.company)}.tex`;
-              const tailoredPath = path.join(__dirname, filename);
+              const tailoredPath = path.join(TAILORED_RESUMES_DIR, filename);
               
               fs.writeFileSync(tailoredPath, job.tailoredResume, 'utf8');
             }

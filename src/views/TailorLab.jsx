@@ -176,6 +176,7 @@ STRICT REQUIREMENTS:
 - Ensure EVERY project entry has at least 4 bullet points.
 - Keep the certification section from the master resume.
 - Do NOT include work rights, visa status, or similar statements.
+- Do NOT hallucinate or add any new skills, certifications, tools, languages, or technologies that are not even remotely present in the master resume (resume.md), even if they are highly relevant to the target job description.
 - Ensure all LaTeX syntax is valid and fully compilable.
 
 # Change Log
@@ -348,6 +349,7 @@ STRICT CONSTRAINTS:
 - Tone: Confident without arrogance, specific without rambling
 - Explicitly state that I have "Full Australian Work Rights".
 - Do NOT use long dashes (em dash/en dash), semi-colons, or colons anywhere in the letter.
+- Do NOT mention or claim proficiency in any new skills, tools, frameworks, or technologies that are not even remotely present in the master resume (resume.md), even if they are highly relevant to the target job description.
 
 LATEX OUTPUT REQUIREMENTS:
 - Provide the COMPLETE, valid, compile-ready LaTeX document using the standard \\article\\ or \\letter\\ class.
