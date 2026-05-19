@@ -1,11 +1,12 @@
 import React from 'react';
 import { Briefcase, FileText, Sliders, MessageSquare, Settings as SettingsIcon, ShieldCheck, ShieldAlert, Database, Sun, Moon } from 'lucide-react';
+import logo from '../assets/logo.png';
 
 export default function Sidebar({ activeView, setActiveView, hasApiKey, jobsCount, activeModel, syncActive, theme, toggleTheme }) {
   return (
     <aside className="sidebar">
-      <div className="sidebar-brand">
-        <span style={{ fontSize: '1.8rem' }}>✈️</span>
+      <div className="sidebar-brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img src={logo} alt="CareerPilot Logo" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
         <span style={{ 
           background: 'linear-gradient(135deg, var(--text-main) 40%, var(--text-muted) 100%)',
           WebkitBackgroundClip: 'text',
