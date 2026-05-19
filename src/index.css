@@ -8,22 +8,22 @@
   --font-title: 'Outfit', sans-serif;
 
   /* Colors based on a highly tailored dark mode palette */
-  --bg-main: hsl(224, 32%, 8%);
-  --bg-sidebar: hsl(224, 38%, 4%);
-  --bg-card: hsla(224, 30%, 12%, 0.45);
-  --bg-card-hover: hsla(224, 30%, 16%, 0.65);
-  --bg-modal: hsl(224, 35%, 10%);
-  --border: hsla(224, 20%, 80%, 0.08);
-  --border-hover: hsla(224, 60%, 80%, 0.15);
+  --bg-main: hsl(190, 25%, 6%);
+  --bg-sidebar: hsl(190, 30%, 4%);
+  --bg-card: hsla(190, 25%, 10%, 0.55);
+  --bg-card-hover: hsla(190, 25%, 15%, 0.75);
+  --bg-modal: hsl(190, 30%, 8%);
+  --border: hsla(175, 40%, 60%, 0.12);
+  --border-hover: hsla(175, 70%, 70%, 0.25);
   
-  --primary: hsl(250, 85%, 65%);
-  --primary-glow: hsla(250, 85%, 65%, 0.35);
-  --secondary: hsl(280, 80%, 65%);
-  --secondary-glow: hsla(280, 80%, 65%, 0.35);
+  --primary: hsl(175, 90%, 50%);
+  --primary-glow: hsla(175, 90%, 50%, 0.35);
+  --secondary: hsl(150, 80%, 50%);
+  --secondary-glow: hsla(150, 80%, 50%, 0.35);
   
-  --text-main: hsl(220, 30%, 94%);
-  --text-muted: hsl(220, 16%, 65%);
-  --text-dark: hsl(220, 12%, 40%);
+  --text-main: hsl(190, 20%, 95%);
+  --text-muted: hsl(190, 15%, 65%);
+  --text-dark: hsl(190, 10%, 40%);
   
   /* Status Colors */
   --color-bookmarked: hsl(210, 80%, 60%);
@@ -42,6 +42,27 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+}
+
+body.theme-light {
+  --bg-main: hsl(190, 10%, 98%);
+  --bg-sidebar: hsl(190, 15%, 95%);
+  --bg-card: hsla(0, 0%, 100%, 0.85);
+  --bg-card-hover: hsla(0, 0%, 100%, 1);
+  --bg-modal: hsl(0, 0%, 100%);
+  --border: hsla(175, 20%, 40%, 0.15);
+  --border-hover: hsla(175, 40%, 40%, 0.3);
+  
+  --primary: hsl(175, 80%, 35%);
+  --primary-glow: hsla(175, 80%, 35%, 0.2);
+  --secondary: hsl(150, 70%, 35%);
+  --secondary-glow: hsla(150, 70%, 35%, 0.2);
+  
+  --text-main: hsl(190, 30%, 15%);
+  --text-muted: hsl(190, 15%, 40%);
+  --text-dark: hsl(190, 10%, 30%);
+  
+  --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
 }
 
 /* Reset and Core Layout */
@@ -650,7 +671,7 @@ textarea.form-control {
   width: 100%;
   height: 100%;
   font-family: 'Courier New', Courier, monospace;
-  background: hsla(224, 30%, 6%, 0.7);
+  background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 20px;
@@ -670,7 +691,7 @@ textarea.form-control {
   border-radius: var(--radius-md);
   padding: 24px;
   overflow-y: auto;
-  background: hsla(224, 30%, 10%, 0.25);
+  background: var(--bg-card);
   border: 1px solid var(--border);
 }
 
@@ -678,7 +699,7 @@ textarea.form-control {
 .markdown-body {
   font-size: 0.95rem;
   line-height: 1.6;
-  color: hsl(220, 20%, 88%);
+  color: var(--text-main);
 }
 
 .markdown-body h1, .markdown-body h2, .markdown-body h3 {
@@ -713,7 +734,7 @@ textarea.form-control {
 }
 
 .markdown-body pre {
-  background: hsla(224, 30%, 5%, 0.8);
+  background: var(--bg-sidebar);
   padding: 16px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);

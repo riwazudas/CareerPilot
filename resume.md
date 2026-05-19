@@ -237,6 +237,15 @@ Strong background in AI infrastructure, backend engineering, cloud deployment, o
 
 # PROJECTS
 
+## AI-Powered CareerPilot Application
+
+- Developed an intelligent career management and AI resume tailoring platform using React, Node.js, and Google Gemini API
+- Implemented a custom backend server for real-time LaTeX compilation supporting dynamic PDF generation
+- Engineered advanced prompt pipelines integrating 10+ psychological framing strategies (AIDA, CAR, STAR-T) for targeted ATS optimization
+- Built a modern, responsive glassmorphism UI featuring live markdown rendering and split-pane editing workspaces
+
+---
+
 ## Nepal Law AI Platform using Multilingual RAG
 
 - Built a multilingual legal AI platform for Nepalese law queries using Retrieval-Augmented Generation pipelines

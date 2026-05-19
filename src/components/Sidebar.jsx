@@ -1,13 +1,13 @@
 import React from 'react';
-import { Briefcase, FileText, Sliders, MessageSquare, Settings as SettingsIcon, ShieldCheck, ShieldAlert, Database } from 'lucide-react';
+import { Briefcase, FileText, Sliders, MessageSquare, Settings as SettingsIcon, ShieldCheck, ShieldAlert, Database, Sun, Moon } from 'lucide-react';
 
-export default function Sidebar({ activeView, setActiveView, hasApiKey, jobsCount, activeModel, syncActive }) {
+export default function Sidebar({ activeView, setActiveView, hasApiKey, jobsCount, activeModel, syncActive, theme, toggleTheme }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
         <span style={{ fontSize: '1.8rem' }}>✈️</span>
         <span style={{ 
-          background: 'linear-gradient(135deg, #fff 40%, var(--text-muted) 100%)',
+          background: 'linear-gradient(135deg, var(--text-main) 40%, var(--text-muted) 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           fontWeight: 800
@@ -95,6 +95,32 @@ export default function Sidebar({ activeView, setActiveView, hasApiKey, jobsCoun
             </>
           )}
         </div>
+
+        {/* Theme Toggle */}
+        <button 
+          onClick={toggleTheme}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            background: 'hsla(190, 20%, 50%, 0.1)',
+            border: '1px solid var(--border)',
+            color: 'var(--text-main)',
+            padding: '8px 12px',
+            borderRadius: 'var(--radius-md)',
+            cursor: 'pointer',
+            justifyContent: 'center',
+            marginTop: '8px',
+            transition: 'var(--transition-fast)'
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.background = 'hsla(190, 20%, 50%, 0.2)'}
+          onMouseLeave={(e) => e.currentTarget.style.background = 'hsla(190, 20%, 50%, 0.1)'}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+          <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </span>
+        </button>
       </div>
     </aside>
   );

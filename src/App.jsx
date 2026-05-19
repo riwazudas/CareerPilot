@@ -100,6 +100,23 @@ function App() {
   const [syncActive, setSyncActive] = useState(false);
   const [isFirstLoad, setIsFirstLoad] = useState(true);
 
+  // Theme state
+  const [theme, setTheme] = useState(() => localStorage.getItem('cp_theme') || 'dark');
+
+  // Apply theme class to body
+  useEffect(() => {
+    if (theme === 'light') {
+      document.body.classList.add('theme-light');
+    } else {
+      document.body.classList.remove('theme-light');
+    }
+    localStorage.setItem('cp_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
   // 1. Initial Load: Fetch data from local Node server
   useEffect(() => {
     fetch('http://localhost:3001/api/data')
@@ -337,6 +354,8 @@ function App() {
         jobsCount={jobs.length}
         activeModel={modelName}
         syncActive={syncActive}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
       <main className="content-frame">
         {renderActiveView()}
