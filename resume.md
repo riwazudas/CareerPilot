@@ -317,6 +317,30 @@ Live Demo: [INSERT GAME LINK]
 
 ---
 
+## Block Stack Height & Stability Prediction (Physical Reasoning Challenge)
+
+- Developed machine learning models to predict the stable height of block stacks (1–6 blocks) from images under complex physical interactions
+- Preprocessed and segmented images using Gaussian smoothing, Canny edge detection, and contour masking to isolate structural features
+- Designed and evaluated multiple architectures including a ResNet50 baseline, Inception-ResNet-V2, and a multimodal Fusion model combining image features with predicted metadata
+- Implemented data augmentation pipelines using Albumentations (horizontal flipping, rotations) to mitigate overfitting on a small dataset
+- Structured model validation using 2-fold cross-validation and tuned hyperparameters (L2 regularization and dropout) to optimize accuracy
+
+GitHub: [ComputerVisionProject](https://github.com/riwazudas/ComputerVisionProject)
+
+---
+
+## Stereo Disparity Map Estimation
+
+- Developed stereo disparity estimation pipelines using the Middlebury dataset to calculate disparity maps from stereo image pairs for 3D scene reconstruction
+- Implemented baseline disparity estimation algorithms and analyzed warping artifacts (e.g., black pixels) resulting from image warping
+- Investigated the influence of window sizes and scaling parameters on the resolution, noise, and quality of calculated disparity maps
+- Utilized OpenCV, NumPy, SciPy, and Matplotlib within an interactive Jupyter Notebook environment for visualization and error analysis
+
+GitHub: [Computing-disparity-between-stereo-images](https://github.com/riwazudas/Computing-disparity-between-stereo-images)
+
+---
+
+
 # EDUCATION
 
 ## University of Melbourne
