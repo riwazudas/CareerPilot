@@ -56,6 +56,10 @@ Strong background in AI infrastructure, backend engineering, cloud deployment, o
 
 ## Training & Evaluation
 - Distributed GPU Training
+- Multi-GPU Cluster Orchestration
+- GPU Training Pipelines
+- High-Performance Computing (HPC)
+- Slurm Workload Manager
 - Hugging Face Accelerate
 - TensorBoard
 - Weights & Biases
@@ -121,6 +125,8 @@ Strong background in AI infrastructure, backend engineering, cloud deployment, o
 - Docker
 - Kubernetes
 - Linux
+- Slurm Workload Manager
+- High-Performance Computing (HPC)
 - CI/CD
 
 ## Monitoring & Observability
@@ -277,12 +283,13 @@ Live Demo: [INSERT GAME LINK]
 
 ---
 
-## Social Media Geotagging using Large Language Models
+## Social Media Geotagging using Large Language Models (Master's Thesis)
 
-- Built multimodal geolocation prediction systems using LLaMA, Gemma, and Mistral models
+- Developed multimodal geolocation prediction systems using LLaMA, Gemma, and Mistral models
 - Implemented hierarchical multi-task learning architectures predicting suburb, municipality, city, and state
-- Applied LoRA fine-tuning, multimodal fusion, and distributed GPU training techniques
-- Processed multi-million record datasets using PyTorch and Hugging Face Accelerate
+- Designed and optimized GPU execution pipelines and LoRA fine-tuning workflows across multi-GPU clusters
+- Orchestrated large-scale distributed training on High-Performance Computing (HPC) environments using Slurm workload manager
+- Processed multi-million record datasets utilizing PyTorch, Hugging Face Accelerate, and optimized data loaders
 
 ---
 
